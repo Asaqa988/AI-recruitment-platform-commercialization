@@ -1,0 +1,4 @@
+# Only needed for the live engine (ENGINE=crew). The sample-data engine needs nothing extra.
+# litellm is deliberately not installed: native providers cover openai/, anthropic/ and gemini/ models,
+# and the original project pinned litellm<=1.82.6.
+crewai>=1.15.28,<2.0.0

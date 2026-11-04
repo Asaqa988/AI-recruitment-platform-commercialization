@@ -1,0 +1,73 @@
+---
+screen_cv_of_candidate_name:
+  description: 'Read the CV at {cv_url} and compare it with the {job_title} requirements:
+    {job_description}. Extract education, experience, skills, certifications and projects,
+    score relevance 0-100, list missing qualifications, and recommend Proceed, Manual
+    Review, or Does Not Meet Criteria.'
+  expected_output: Structured JSON with extracted sections, score, missing qualifications,
+    evidence, and recommendation.
+  agent: cv_screening_agent
+prepare_interview_for_candidate_name:
+  description: Using the screening results, produce exactly 10 tailored questions
+    (technical, behavioral, practical) for {job_title}, with difficulty and follow-up
+    hints. Also draft the interview invitation instructions.
+  expected_output: A numbered list of 10 questions with type, difficulty and follow-up
+    hints.
+  agent: interviewer_agent
+  context:
+  - screen_cv_of_candidate_name
+evaluate_interview_of_candidate_name:
+  description: 'Evaluate the 10 answers in the transcript: {interview_transcript}.
+    Score each, give evidence, strengths and weaknesses, and compute the final score
+    out of 100.'
+  expected_output: JSON with per-question question, answer, score, explanation, strengths,
+    weaknesses, and final score /100.
+  agent: interview_evaluation_agent
+  context:
+  - prepare_interview_for_candidate_name
+recommend_hiring_decision_for_candidate_name:
+  description: Review screening and evaluation, apply passing score {passing_score},
+    and recommend Pass, Fail, or Manual Review with reasoning. Mark it as pending
+    HR approval.
+  expected_output: Recommendation, reasoning, score summary, and an HR approval-required
+    notice.
+  agent: hiring_decision_agent
+  context:
+  - screen_cv_of_candidate_name
+  - evaluate_interview_of_candidate_name
+draft_stage_email_for_candidate_name:
+  description: Draft the {email_scenario} email to {candidate_email} based on the
+    hiring recommendation. For rejection or hiring, state it is only to be sent after
+    HR approval.
+  expected_output: Email subject, body, and send-readiness note.
+  agent: email_communication_agent
+  context:
+  - recommend_hiring_decision_for_candidate_name
+assess_salary_expectation_of_candidate_name:
+  description: Compare {expected_salary} {currency} with the range {salary_min}-{salary_max},
+    classify the scenario, and draft the reply without promising any offer.
+  expected_output: Scenario classification, recorded expectation, and draft candidate
+    reply.
+  agent: salary_negotiation_agent
+  context:
+  - draft_stage_email_for_candidate_name
+verify_documents_of_candidate_name:
+  description: Compare submitted documents {submitted_documents} with required {required_documents}.
+    Flag missing or unreadable ones and draft a reminder if needed. No authenticity
+    claims.
+  expected_output: Checklist with status per document, flags, and reminder draft if
+    incomplete.
+  agent: document_collection_agent
+  context:
+  - assess_salary_expectation_of_candidate_name
+prepare_hr_onboarding_report_for_candidate_name:
+  description: 'Compile the full candidate profile: screening, interview, decision,
+    salary, documents. Verify stage completion and note that final hiring requires
+    explicit HR approval.'
+  expected_output: A complete HR onboarding report in markdown with stage checklist
+    and approval notice.
+  agent: hr_onboarding_agent
+  context:
+  - recommend_hiring_decision_for_candidate_name
+  - assess_salary_expectation_of_candidate_name
+  - verify_documents_of_candidate_name
