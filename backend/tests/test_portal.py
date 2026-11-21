@@ -125,3 +125,17 @@ def test_closed_jobs_and_no_credit_wait(client):
     assert "screen" not in cd["stages"] and any("waiting for HR" in e["message"] for e in cd["events"])
     view = client.get(f"/api/portal/applications/{r.json()['id']}", headers=cand).json()
     assert view["status"] == "received"
+
+
+def test_demo_accounts_are_seeded_once(client):
+    from app import config, seed
+    config.SEED_DEMO_ACCOUNTS = True
+    try:
+        seed.run()
+        seed.run()  # idempotent: no second top-up, no duplicate user
+    finally:
+        config.SEED_DEMO_ACCOUNTS = False
+    hr = client.post("/api/auth/login", json={"email": config.DEMO_HR_EMAIL, "password": config.DEMO_HR_PASSWORD})
+    cand = client.post("/api/auth/login", json={"email": config.DEMO_CANDIDATE_EMAIL, "password": config.DEMO_CANDIDATE_PASSWORD})
+    assert hr.status_code == 200 and hr.json()["user"]["role"] == "hr" and hr.json()["user"]["credits"] == config.DEMO_CREDITS
+    assert cand.status_code == 200 and cand.json()["user"]["role"] == "candidate"

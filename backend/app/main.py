@@ -9,13 +9,14 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field, field_validator
 
-from . import config, db, engine, hiring, portal, pricing, runner, security
+from . import config, db, engine, hiring, portal, pricing, runner, security, seed
 from .deps import admin_user, current_user, hr_user, public_user
 
 
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
     db.init()
+    seed.run()
     runner.resume_pending()
     yield
 

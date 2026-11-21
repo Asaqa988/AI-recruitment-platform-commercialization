@@ -43,6 +43,15 @@ CREW_MODEL = env("CREW_MODEL", "openai/gpt-4o-mini")
 # Candidate-facing writing (emails, the HR report) can use a stronger model than scoring does.
 CREW_WRITER_MODEL = env("CREW_WRITER_MODEL", CREW_MODEL)
 
+# Two ready-made accounts (one HR with plenty of credits, one candidate) created or refreshed at every start.
+# For development and demos only: they use known passwords, so they are never seeded when APP_ENV=production.
+SEED_DEMO_ACCOUNTS = env("SEED_DEMO_ACCOUNTS", "0" if APP_ENV == "production" else "1") == "1" and APP_ENV != "production"
+DEMO_CREDITS = int(env("DEMO_CREDITS", "50000"))
+DEMO_HR_EMAIL = env("DEMO_HR_EMAIL", "hr.demo@example.com").strip().lower()
+DEMO_HR_PASSWORD = env("DEMO_HR_PASSWORD", "HrDemo-2026!")
+DEMO_CANDIDATE_EMAIL = env("DEMO_CANDIDATE_EMAIL", "candidate.demo@example.com").strip().lower()
+DEMO_CANDIDATE_PASSWORD = env("DEMO_CANDIDATE_PASSWORD", "CandidateDemo-2026!")
+
 MAX_CV_BYTES = 5 * 1024 * 1024
 MAX_STAGE_ATTEMPTS = int(env("MAX_STAGE_ATTEMPTS", "5"))  # runs of one stage per candidate (cost control)
 
